@@ -1,42 +1,46 @@
-local P, G, S = game.Players.LocalPlayer, game:GetService("CoreGui"), game:GetService("TweenService")
+local P, G, S = game.Players.LocalPlayer, game:GetService("CoreGui"), game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 
 -- Чистим старое
 local function Clean(name) if G:FindFirstChild(name) then G[name]:Destroy() end end
 Clean("DarkElite"); Clean("DarkToggleGui"); Clean("DarkScreamer")
 
--- --- 1. ПРЯМ СТРАШНЫЙ СКРИМЕР (V11) ---
+-- --- 1. ГАРАНТИРОВАННЫЙ ХОРРОР-ЛОАДЕР (БЕЗ ID) ---
 local sc = Instance.new("ScreenGui", G); sc.Name = "DarkScreamer"
-local face = Instance.new("ImageLabel", sc)
-face.Size = UDim2.new(1.5, 0, 1.5, 0) -- Больше экрана для эффекта
-face.Position = UDim2.new(0.5, 0, 0.5, 0)
-face.AnchorPoint = Vector2.new(0.5, 0.5)
-face.Image = "rbxassetid://10435316484" -- Жуткая рожа (если удалят, замени на 10834460683)
-face.BackgroundTransparency = 1
-face.ZIndex = 999
+local bg = Instance.new("Frame", sc); bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Color3.new(0,0,0); bg.ZIndex = 999
 
-local sound = Instance.new("Sound", sc)
-sound.SoundId = "rbxassetid://5567501602" -- Очень громкий крик
-sound.Volume = 10 -- Максималка
+-- Рисуем жуткую рожу программно
+local function CreatePart(sz, ps, clr)
+    local p = Instance.new("Frame", bg); p.Size = sz; p.Position = ps; p.BackgroundColor3 = clr; p.BorderSizePixel = 0; return p
+end
 
+local eyeL = CreatePart(UDim2.new(0, 80, 0, 80), UDim2.new(0.35, -40, 0.35, 0), Color3.new(1,0,0))
+local eyeR = CreatePart(UDim2.new(0, 80, 0, 80), UDim2.new(0.65, -40, 0.35, 0), Color3.new(1,0,0))
+local mouth = CreatePart(UDim2.new(0, 200, 0, 50), UDim2.new(0.5, -100, 0.7, 0), Color3.new(1,1,1))
+Instance.new("UICorner", eyeL).CornerRadius = UDim.new(1,0)
+Instance.new("UICorner", eyeR).CornerRadius = UDim.new(1,0)
+Instance.new("UICorner", mouth).CornerRadius = UDim.new(0,20)
+
+-- Звук (используем стандартный из папки звуков игры)
+local sound = Instance.new("Sound", bg)
+sound.SoundId = "rbxasset://sounds/action_falling_clobber.mp3" -- Этот файл есть у ВСЕХ
+sound.Volume = 10; sound.Pitch = 0.5; sound:Play()
+
+-- Эффект безумия
 task.spawn(function()
-    sound:Play()
-    -- Эффект "вылета" в лицо
-    face:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Quad", 0.1)
-    
-    -- Тряска и мерцание
-    for i = 1, 30 do
-        face.Position = UDim2.new(0.5, math.random(-50,50), 0.5, math.random(-50,50))
-        face.ImageColor3 = (i % 2 == 0) and Color3.new(1,1,1) or Color3.new(1,0,0)
+    for i = 1, 40 do
+        bg.BackgroundColor3 = (i % 2 == 0) and Color3.new(0,0,0) or Color3.new(0.2,0,0)
+        eyeL.Size = UDim2.new(0, math.random(60,120), 0, math.random(60,120))
+        eyeR.Size = eyeL.Size
+        bg.Position = UDim2.new(0, math.random(-30,30), 0, math.random(-30,30))
         task.wait(0.03)
     end
-    
-    sc:Destroy() -- Исчезает и открывает меню
+    sc:Destroy()
 end)
 
--- --- ПЕРЕМЕННЫЕ ---
+-- --- ПЕРЕМЕННЫЕ ЧИТОВ ---
 _G.FlySpeed = 2
-_G.SpinSpeed = 80
+_G.SpinSpeed = 100
 
 -- --- 2. КНОПКА-ПЛЮСИК (+) ---
 local tg = Instance.new("ScreenGui", G); tg.Name = "DarkToggleGui"
@@ -75,11 +79,6 @@ Add("👤 AVATAR ESP", function(on)
     end)
 end)
 
-Add("📏 TRACERS (LINES)", function(on)
-    _G.Tracers = on
-    if on then loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Exunys-ESP/main/src/Tracer.lua"))() end
-end)
-
 Add("🔄 SPINBOT", function(on)
     _G.Spin = on
     task.spawn(function()
@@ -92,13 +91,17 @@ Add("🔄 SPINBOT", function(on)
     end)
 end)
 
-Add("📍 TELEPORT TO PLAYER", function()
-    local all = game.Players:GetPlayers()
-    local target = all[math.random(1, #all)]
-    if target ~= P and target.Character then P.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame end
+Add("📏 TRACERS (LINES)", function(on)
+    _G.Tracers = on
+    if on then loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Exunys-ESP/main/src/Tracer.lua"))() end
 end)
 
-Add("✈️ FLY (SMOOTH CFRAME)", function(on)
+Add("📍 TP TO RANDOM", function()
+    local all = game.Players:GetPlayers(); local t = all[math.random(1, #all)]
+    if t ~= P and t.Character then P.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame end
+end)
+
+Add("✈️ FLY (SMOOTH)", function(on)
     _G.Flying = on
     task.spawn(function()
         while _G.Flying do
