@@ -1,9 +1,13 @@
-local P, G, S = game.Players.LocalPlayer, game:GetService("CoreGui"), game:GetService("TweenService")
+local P, G, S = game.Players.LocalPlayer, game:GetService("CoreGui"), game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 
 -- Чистим старое
 if G:FindFirstChild("DarkElite") then G.DarkElite:Destroy() end
 if G:FindFirstChild("DarkToggleGui") then G.DarkToggleGui:Destroy() end
+
+-- Переменные для Полета
+_G.FlySpeed = 50
+local flyConnection
 
 -- --- КНОПКА-ПЛЮСИК (X / +) ---
 local tg = Instance.new("ScreenGui", G); tg.Name = "DarkToggleGui"
@@ -15,7 +19,7 @@ Instance.new("UIStroke", b).Color = Color3.new(1,0,0); Instance.new("UICorner", 
 
 -- --- ГЛАВНОЕ ОКНО ---
 local s = Instance.new("ScreenGui", G); s.Name = "DarkElite"
-local m = Instance.new("Frame", s); m.Size = UDim2.new(0, 260, 0, 400); m.Position = UDim2.new(0.5, -130, 0.5, -200); m.BackgroundColor3 = Color3.new(0,0,0); m.Active = true; m.Draggable = true
+local m = Instance.new("Frame", s); m.Size = UDim2.new(0, 260, 0, 420); m.Position = UDim2.new(0.5, -130, 0.5, -210); m.BackgroundColor3 = Color3.new(0,0,0); m.Active = true; m.Draggable = true
 Instance.new("UIStroke", m).Color = Color3.new(1, 0, 0); Instance.new("UICorner", m)
 
 b.MouseButton1Click:Connect(function()
@@ -32,80 +36,87 @@ local function Add(txt, fn, clr)
     local on = false
     btn.MouseButton1Click:Connect(function()
         on = not on; btn.BackgroundColor3 = on and Color3.new(0.6, 0, 0) or (clr or Color3.fromRGB(25,25,25))
-        pcall(function() fn(on) end)
+        pcall(function() fn(on, btn) end)
     end)
 end
 
 -- --- ФУНКЦИИ ---
 
--- 1. INVISIBLE (ВКЛ / ВЫКЛ)
-Add("🌫️ INVISIBLE (TOGGLE)", function(on)
+-- 1. ЛУЧШИЙ FLY (ВСТРОЕННЫЙ)
+Add("✈️ FLY: OFF", function(on, btn)
+    _G.Flying = on
+    btn.Text = on and "✈️ FLY: ON (WORKING)" or "✈️ FLY: OFF"
+    
     if on then
-        -- Становимся невидимым
-        local char = P.Character
-        if char then
-            _G.OldPos = char.HumanoidRootPart.CFrame
-            char:MoveTo(Vector3.new(0, 1000, 0)) -- Прячем тело под карту или высоко в небо
-            task.wait(0.2)
-            local clone = char.HumanoidRootPart:Clone()
-            clone.Parent = char
-            clone.CFrame = _G.OldPos
-            char.HumanoidRootPart:Destroy()
-            print("Invisible ON")
-        end
+        local bg = Instance.new("BodyGyro", P.Character.HumanoidRootPart)
+        bg.P = 9e4; bg.maxTorque = Vector3.new(9e9, 9e9, 9e9); bg.cframe = P.Character.HumanoidRootPart.CFrame
+        local bv = Instance.new("BodyVelocity", P.Character.HumanoidRootPart)
+        bv.velocity = Vector3.new(0,0.1,0); bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+        
+        flyConnection = S.RenderStepped:Connect(function()
+            P.Character.Humanoid.PlatformStand = true
+            local cam = workspace.CurrentCamera.CFrame
+            local moveDir = P.Character.Humanoid.MoveDirection
+            bv.velocity = (cam.LookVector * moveDir.Z + cam.RightVector * moveDir.X) * _G.FlySpeed
+            bg.cframe = cam
+            if moveDir.Magnitude == 0 then bv.velocity = Vector3.new(0,0.1,0) end
+        end)
     else
-        -- Появляемся обратно (самый надежный способ - быстрый ресет персонажа)
-        P.Character:BreakJoints()
-        print("Visible ON (Respawning)")
+        if flyConnection then flyConnection:Disconnect() end
+        P.Character.Humanoid.PlatformStand = false
+        if P.Character.HumanoidRootPart:FindFirstChild("BodyGyro") then P.Character.HumanoidRootPart.BodyGyro:Destroy() end
+        if P.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") then P.Character.HumanoidRootPart.BodyVelocity:Destroy() end
     end
-end, Color3.fromRGB(0, 100, 0))
+end, Color3.fromRGB(0, 80, 200))
 
--- 2. WORKING FLY (V3 MOBILE)
-Add("✈️ FLY MODE (V3)", function(on)
+-- 2. СКОРОСТЬ ПОЛЕТА (ПЕРЕКЛЮЧАТЕЛЬ)
+Add("🏃 FLY SPEED: 50", function(on, btn)
+    if _G.FlySpeed == 50 then _G.FlySpeed = 150; btn.Text = "🏃 FLY SPEED: 150"
+    elseif _G.FlySpeed == 150 then _G.FlySpeed = 300; btn.Text = "🏃 FLY SPEED: 300"
+    else _G.FlySpeed = 50; btn.Text = "🏃 FLY SPEED: 50" end
+end)
+
+-- 3. INVISIBLE (TOGGLE + RETURN)
+Add("🌫️ INVISIBLE", function(on)
+    _G.Invis = on
+    local char = P.Character
     if on then
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.lua"))()
+        for _, v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 1 end
+        end
+        char.Head.face.Transparency = 1
+    else
+        for _, v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 0 end
+        end
+        char.Head.face.Transparency = 0
     end
-end, Color3.fromRGB(0, 50, 150))
+end)
 
--- 3. RAINBOW SKIN
+-- 4. RAINBOW SKIN
 Add("🌈 RAINBOW SKIN", function(st)
     _G.Rain = st
     while _G.Rain do
         local c = Color3.fromHSV(tick() % 5 / 5, 1, 1)
         if P.Character then
-            for _, v in pairs(P.Character:GetChildren()) do
-                if v:IsA("BasePart") then v.Color = c end
-            end
+            for _, v in pairs(P.Character:GetChildren()) do if v:IsA("BasePart") then v.Color = c end end
         end
         task.wait(0.1)
     end
 end)
 
--- 4. ZOOM CLICK
+-- 5. ТЕЛЕПОРТ, ZOOM И ПРОЧЕЕ
+Add("📍 TP TO PLAYER", function()
+    local all = game.Players:GetPlayers(); local target = all[math.random(1, #all)]
+    if target ~= P and target.Character then P.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame end
+end)
+
 Add("🔍 ZOOM CLICK", function(on)
     _G.ZC = on
     P:GetMouse().Button2Down:Connect(function() if _G.ZC then workspace.CurrentCamera.FieldOfView = 20 end end)
     P:GetMouse().Button2Up:Connect(function() if _G.ZC then workspace.CurrentCamera.FieldOfView = 70 end end)
 end)
 
--- 5. FE FLING (KILL)
-Add("🌪️ FE FLING", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))()
-end)
-
--- 6. SUPER JUMP (200)
-Add("🚀 SUPER JUMP", function(on)
-    P.Character.Humanoid.JumpPower = on and 200 or 50
-    P.Character.Humanoid.UseJumpPower = true
-end)
-
--- 7. SPEED 150
-Add("⚡ SPEED 150", function(on)
-    P.Character.Humanoid.WalkSpeed = on and 150 or 16
-end)
-
-Add("🧱 INF YIELD", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-end)
-
+Add("🌪️ FE FLING", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))() end)
+Add("🧱 INF YIELD", function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end)
 Add("❌ EXIT HUB", function() s:Destroy(); tg:Destroy() end, Color3.fromRGB(50, 50, 50))
