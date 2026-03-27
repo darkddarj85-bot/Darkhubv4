@@ -1,12 +1,12 @@
--- FULL DARK HUB V5: 11 FUNCTIONS + TOGGLE
+-- DARK HUB V6: RAINBOW & VISUALS EDITION
 local P, G, S = game.Players.LocalPlayer, game:GetService("CoreGui"), game:GetService("RunService")
 
--- 1. ОЧИСТКА
+-- 1. ЧИСТИМ СТАРЬЁ
 for _, v in pairs(G:GetChildren()) do
     if v.Name == "DarkElite" or v.Name == "DarkToggleGui" then v:Destroy() end
 end
 
--- 2. КНОПКА-ПЛЮСИК (ДЛЯ СКРЫТИЯ)
+-- 2. КНОПКА-ПЛЮСИК (+)
 local tg = Instance.new("ScreenGui", G); tg.Name = "DarkToggleGui"
 local b = Instance.new("TextButton", tg)
 b.Size = UDim2.new(0, 45, 0, 45); b.Position = UDim2.new(0, 15, 0.5, -22)
@@ -25,7 +25,7 @@ b.MouseButton1Click:Connect(function()
     b.TextColor3 = m.Visible and Color3.new(1,0,0) or Color3.new(0,1,0)
 end)
 
-local sc = Instance.new("ScrollingFrame", m); sc.Size = UDim2.new(1, -10, 1, -10); sc.Position = UDim2.new(0, 5, 0, 5); sc.BackgroundTransparency = 1; sc.CanvasSize = UDim2.new(0, 0, 0, 1600); sc.ScrollBarThickness = 2
+local sc = Instance.new("ScrollingFrame", m); sc.Size = UDim2.new(1, -10, 1, -10); sc.Position = UDim2.new(0, 5, 0, 5); sc.BackgroundTransparency = 1; sc.CanvasSize = UDim2.new(0, 0, 0, 1800); sc.ScrollBarThickness = 2
 Instance.new("UIListLayout", sc).Padding = UDim.new(0, 5)
 
 local function Add(txt, fn, clr)
@@ -34,9 +34,54 @@ local function Add(txt, fn, clr)
     btn.MouseButton1Click:Connect(function() on = not on; btn.BackgroundColor3 = on and Color3.new(0.6,0,0) or (clr or Color3.fromRGB(25,25,25)); pcall(function() fn(on) end) end)
 end
 
--- --- ВСЕ 11 ФУНКЦИЙ ---
+-- --- НОВЫЕ ВИЗУАЛЫ И ФУНКЦИИ ---
 
--- 1. ВХ АВАТАРЫ
+-- 1. РАДУЖНАЯ КОЖА (Rainbow Skin)
+Add("🌈 RAINBOW SKIN", function(st)
+    _G.Rainbow = st
+    while _G.Rainbow do
+        local color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+        if P.Character then
+            for _, v in pairs(P.Character:GetChildren()) do
+                if v:IsA("BasePart") then v.Color = color end
+            end
+        end
+        task.wait(0.1)
+    end
+end, Color3.fromRGB(100, 0, 150))
+
+-- 2. ESP BOXES (Квадраты вокруг игроков)
+Add("📦 ESP BOXES", function(st)
+    _G.Boxes = st
+    while _G.Boxes do
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p ~= P and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and not p.Character:FindFirstChild("BoxESP") then
+                local b = Instance.new("BoxHandleAdornment", p.Character); b.Name = "BoxESP"; b.AlwaysOnTop = true; b.Adornee = p.Character; b.Size = Vector3.new(4, 6, 1); b.Transparency = 0.5; b.Color3 = Color3.new(1,0,0); b.ZIndex = 10
+            end
+        end
+        task.wait(1)
+        if not _G.Boxes then for _,p in pairs(game.Players:GetPlayers()) do if p.Character and p.Character:FindFirstChild("BoxESP") then p.Character.BoxESP:Destroy() end end end
+    end
+end)
+
+-- 3. ТРАССЕРЫ (Линии к игрокам)
+Add("📏 ESP TRACERS", function(st)
+    _G.Tracers = st
+    -- Подключаем универсальный скрипт трассеров
+    if st then loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Exunys-ESP/main/src/Tracer.lua"))() end
+end)
+
+-- 4. РОБОЧИЙ FLING (Разброс)
+Add("🌪️ FE FLING (BEST)", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))()
+end, Color3.fromRGB(150, 0, 0))
+
+-- 5. РОБОЧИЙ FLY (Полет V3)
+Add("✈️ FLY MODE (V3)", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.lua"))()
+end, Color3.fromRGB(0, 100, 200))
+
+-- --- ОСТАЛЬНОЕ ---
 Add("👤 ESP AVATARS", function(st)
     _G.esp_av = st
     while _G.esp_av do
@@ -51,54 +96,18 @@ Add("👤 ESP AVATARS", function(st)
     end
 end)
 
--- 2. ТРАССЕРЫ (ВХ ЛИНИИ)
-Add("📏 ESP TRACERS", function(st)
-    _G.tracers = st
-    S.RenderStepped:Connect(function()
-        if not _G.tracers then return end
-        for _, p in pairs(game.Players:GetPlayers()) do
-            if p ~= P and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                -- Логика отрисовки линий (упрощенно для мобилок)
-            end
-        end
-    end)
-end)
-
--- 3. ZOOM CLICK (RMB)
 Add("🔍 ZOOM CLICK", function(on)
     _G.ZC = on
     P:GetMouse().Button2Down:Connect(function() if _G.ZC then workspace.CurrentCamera.FieldOfView = 20 end end)
     P:GetMouse().Button2Up:Connect(function() if _G.ZC then workspace.CurrentCamera.FieldOfView = 70 end end)
 end)
 
--- 4. ТЕЛЕПОРТ К ИГРОКУ
-Add("📍 TP TO RANDOM", function()
-    local all = game.Players:GetPlayers(); local r = all[math.random(1, #all)]
-    if r ~= P and r.Character then P.Character.HumanoidRootPart.CFrame = r.Character.HumanoidRootPart.CFrame end
-end)
-
--- 5. СУПЕР ПРЫЖОК
-Add("🚀 SUPER JUMP (200)", function(on) P.Character.Humanoid.JumpPower = on and 200 or 50; P.Character.Humanoid.UseJumpPower = true end)
-
--- 6. ИНВИЗ (FIXED)
 Add("🌫️ INVISIBLE (WORK)", function()
     local c = P.Character
     if c then for _,v in pairs(c:GetDescendants()) do if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 1 end end end
-end, Color3.fromRGB(0, 60, 0))
+end)
 
--- 7. ПОЛЕТ (FLY)
-Add("✈️ FLY MODE", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.lua"))() end)
-
--- 8. ФЛИНГ (FE FLING)
-Add("🌪️ FE FLING", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))() end)
-
--- 9. БЕСКОНЕЧНЫЕ ПРЫЖКИ
-Add("🦘 INF JUMP", function(on) _G.IJ = on; game:GetService("UserInputService").JumpRequest:Connect(function() if _G.IJ then P.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end) end)
-
--- 10. СКОРОСТЬ 150
 Add("⚡ SPEED 150", function(on) P.Character.Humanoid.WalkSpeed = on and 150 or 16 end)
-
--- 11. INF YIELD (АДМИНКА)
+Add("🚀 SUPER JUMP", function(on) P.Character.Humanoid.JumpPower = on and 200 or 50; P.Character.Humanoid.UseJumpPower = true end)
 Add("🧱 INF YIELD", function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end)
-
 Add("❌ EXIT HUB", function() s:Destroy(); tg:Destroy() end, Color3.fromRGB(50, 50, 50))
