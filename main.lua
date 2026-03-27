@@ -1,25 +1,42 @@
-local P, G, S = game.Players.LocalPlayer, game:GetService("CoreGui"), game:GetService("RunService")
+local P, G, S = game.Players.LocalPlayer, game:GetService("CoreGui"), game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 
--- Очистка старья
+-- Чистим старое
 local function Clean(name) if G:FindFirstChild(name) then G[name]:Destroy() end end
 Clean("DarkElite"); Clean("DarkToggleGui"); Clean("DarkScreamer")
 
--- --- 1. ХОРРОР-ЛОАДЕР (ГЛАЗА + КРИК) ---
+-- --- 1. ПРЯМ СТРАШНЫЙ СКРИМЕР (V11) ---
 local sc = Instance.new("ScreenGui", G); sc.Name = "DarkScreamer"
-local bg = Instance.new("Frame", sc); bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Color3.new(0,0,0); bg.ZIndex = 9
-local eL = Instance.new("Frame", bg); eL.Size = UDim2.new(0, 60, 0, 60); eL.Position = UDim2.new(0.4, -30, 0.4, 0); eL.BackgroundColor3 = Color3.new(1,0,0); Instance.new("UICorner", eL).CornerRadius = UDim.new(1,0)
-local eR = Instance.new("Frame", bg); eR.Size = UDim2.new(0, 60, 0, 60); eR.Position = UDim2.new(0.6, -30, 0.4, 0); eR.BackgroundColor3 = Color3.new(1,0,0); Instance.new("UICorner", eR).CornerRadius = UDim.new(1,0)
-local sound = Instance.new("Sound", bg); sound.SoundId = "rbxassetid://1315356450"; sound.Volume = 10; sound:Play()
+local face = Instance.new("ImageLabel", sc)
+face.Size = UDim2.new(1.5, 0, 1.5, 0) -- Больше экрана для эффекта
+face.Position = UDim2.new(0.5, 0, 0.5, 0)
+face.AnchorPoint = Vector2.new(0.5, 0.5)
+face.Image = "rbxassetid://10435316484" -- Жуткая рожа (если удалят, замени на 10834460683)
+face.BackgroundTransparency = 1
+face.ZIndex = 999
+
+local sound = Instance.new("Sound", sc)
+sound.SoundId = "rbxassetid://5567501602" -- Очень громкий крик
+sound.Volume = 10 -- Максималка
 
 task.spawn(function()
-    for i = 1, 15 do bg.Position = UDim2.new(0, math.random(-40,40), 0, math.random(-40,40)); task.wait(0.05) end
-    sc:Destroy()
+    sound:Play()
+    -- Эффект "вылета" в лицо
+    face:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Quad", 0.1)
+    
+    -- Тряска и мерцание
+    for i = 1, 30 do
+        face.Position = UDim2.new(0.5, math.random(-50,50), 0.5, math.random(-50,50))
+        face.ImageColor3 = (i % 2 == 0) and Color3.new(1,1,1) or Color3.new(1,0,0)
+        task.wait(0.03)
+    end
+    
+    sc:Destroy() -- Исчезает и открывает меню
 end)
 
 -- --- ПЕРЕМЕННЫЕ ---
 _G.FlySpeed = 2
-_G.SpinSpeed = 60
+_G.SpinSpeed = 80
 
 -- --- 2. КНОПКА-ПЛЮСИК (+) ---
 local tg = Instance.new("ScreenGui", G); tg.Name = "DarkToggleGui"
@@ -31,7 +48,7 @@ local m = Instance.new("Frame", s); m.Size = UDim2.new(0, 260, 0, 420); m.Positi
 
 b.MouseButton1Click:Connect(function() m.Visible = not m.Visible; b.Text = m.Visible and "X" or "+" end)
 
-local sc_frame = Instance.new("ScrollingFrame", m); sc_frame.Size = UDim2.new(1, -10, 1, -10); sc_frame.Position = UDim2.new(0, 5, 0, 5); sc_frame.BackgroundTransparency = 1; sc_frame.CanvasSize = UDim2.new(0, 0, 0, 2200)
+local sc_frame = Instance.new("ScrollingFrame", m); sc_frame.Size = UDim2.new(1, -10, 1, -10); sc_frame.Position = UDim2.new(0, 5, 0, 5); sc_frame.BackgroundTransparency = 1; sc_frame.CanvasSize = UDim2.new(0, 0, 0, 2400)
 Instance.new("UIListLayout", sc_frame).Padding = UDim.new(0, 5)
 
 local function Add(txt, fn)
@@ -40,16 +57,15 @@ local function Add(txt, fn)
     btn.MouseButton1Click:Connect(function() on = not on; btn.BackgroundColor3 = on and Color3.new(0.5,0,0) or Color3.fromRGB(20,20,20); pcall(function() fn(on, btn) end) end)
 end
 
--- --- ФУНКЦИИ V10 ---
+-- --- ФУНКЦИИ ---
 
--- 1. ВХ ПО АВАТАРУ
-Add("👤 AVATAR ESP: OFF", function(on, btn)
-    _G.AvESP = on; btn.Text = on and "👤 AVATAR ESP: ON" or "👤 AVATAR ESP: OFF"
+Add("👤 AVATAR ESP", function(on)
+    _G.AvESP = on
     task.spawn(function()
         while _G.AvESP do
             for _, p in pairs(game.Players:GetPlayers()) do
                 if p ~= P and p.Character and p.Character:FindFirstChild("Head") and not p.Character.Head:FindFirstChild("AvX") then
-                    local g = Instance.new("BillboardGui", p.Character.Head); g.Name = "AvX"; g.AlwaysOnTop = true; g.Size = UDim2.new(0, 40, 0, 40); g.ExtentsOffset = Vector3.new(0, 3, 0)
+                    local g = Instance.new("BillboardGui", p.Character.Head); g.Name = "AvX"; g.AlwaysOnTop = true; g.Size = UDim2.new(0, 45, 0, 45); g.ExtentsOffset = Vector3.new(0, 3, 0)
                     local i = Instance.new("ImageLabel", g); i.Size = UDim2.new(1, 0, 1, 0); i.Image = "rbxthumb://type=AvatarHeadShot&id="..p.UserId.."&w=150&h=150"; i.BackgroundTransparency = 1; Instance.new("UICorner", i).CornerRadius = UDim.new(1, 0)
                 end
             end
@@ -59,17 +75,13 @@ Add("👤 AVATAR ESP: OFF", function(on, btn)
     end)
 end)
 
--- 2. ТРАССЕРЫ (ЛИНИИ)
-Add("📏 TRACERS: OFF", function(on, btn)
-    _G.Tracers = on; btn.Text = on and "📏 TRACERS: ON" or "📏 TRACERS: OFF"
-    if on then
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Exunys-ESP/main/src/Tracer.lua"))()
-    end
+Add("📏 TRACERS (LINES)", function(on)
+    _G.Tracers = on
+    if on then loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Exunys-ESP/main/src/Tracer.lua"))() end
 end)
 
--- 3. SPINBOT (КРУТИЛКА)
-Add("🔄 SPINBOT: OFF", function(on, btn)
-    _G.Spin = on; btn.Text = on and "🔄 SPINBOT: ON" or "🔄 SPINBOT: OFF"
+Add("🔄 SPINBOT", function(on)
+    _G.Spin = on
     task.spawn(function()
         while _G.Spin do
             if P.Character and P.Character:FindFirstChild("HumanoidRootPart") then
@@ -80,15 +92,13 @@ Add("🔄 SPINBOT: OFF", function(on, btn)
     end)
 end)
 
--- 4. ТЕЛЕПОРТ К ИГРОКУ
 Add("📍 TELEPORT TO PLAYER", function()
     local all = game.Players:GetPlayers()
     local target = all[math.random(1, #all)]
     if target ~= P and target.Character then P.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame end
 end)
 
--- 5. ПЛАВНЫЙ ФЛАЙ
-Add("✈️ FLY (SMOOTH)", function(on)
+Add("✈️ FLY (SMOOTH CFRAME)", function(on)
     _G.Flying = on
     task.spawn(function()
         while _G.Flying do
@@ -99,7 +109,6 @@ Add("✈️ FLY (SMOOTH)", function(on)
     end)
 end)
 
--- 6. АИМБОТ НА ТЕЛО
 Add("🎯 AIMBOT (BODY)", function(on)
     _G.Aimbot = on
     task.spawn(function()
@@ -117,7 +126,6 @@ Add("🎯 AIMBOT (BODY)", function(on)
     end)
 end)
 
--- ОСТАЛЬНОЕ
 Add("🌈 RAINBOW SKIN", function(st)
     _G.Rain = st
     while _G.Rain do
@@ -127,6 +135,6 @@ Add("🌈 RAINBOW SKIN", function(st)
     end
 end)
 
-Add("🌪️ FE FLING", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))() end)
 Add("🌫️ INVISIBLE", function(on) for _,v in pairs(P.Character:GetDescendants()) do if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = on and 1 or 0 end end end)
+Add("🌪️ FE FLING", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))() end)
 Add("❌ CLOSE", function() s:Destroy(); tg:Destroy() end)
