@@ -1,46 +1,32 @@
 local P, G, S = game.Players.LocalPlayer, game:GetService("CoreGui"), game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
+local Mouse = P:GetMouse()
 
--- Чистим старое
+-- Чистка
 local function Clean(name) if G:FindFirstChild(name) then G[name]:Destroy() end end
-Clean("DarkElite"); Clean("DarkToggleGui"); Clean("DarkScreamer")
+Clean("DarkElite"); Clean("DarkToggleGui"); Clean("DarkScreamer"); Clean("DarkFOV")
 
--- --- 1. ГАРАНТИРОВАННЫЙ ХОРРОР-ЛОАДЕР (БЕЗ ID) ---
+-- --- 1. ГАРАНТИРОВАННЫЙ СКРИМЕР ---
 local sc = Instance.new("ScreenGui", G); sc.Name = "DarkScreamer"
 local bg = Instance.new("Frame", sc); bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Color3.new(0,0,0); bg.ZIndex = 999
+local eL = Instance.new("Frame", bg); eL.Size = UDim2.new(0, 80, 0, 80); eL.Position = UDim2.new(0.35, -40, 0.35, 0); eL.BackgroundColor3 = Color3.new(1,0,0); Instance.new("UICorner", eL).CornerRadius = UDim.new(1,0)
+local eR = Instance.new("Frame", bg); eR.Size = UDim2.new(0, 80, 0, 80); eR.Position = UDim2.new(0.65, -40, 0.35, 0); eR.BackgroundColor3 = Color3.new(1,0,0); Instance.new("UICorner", eR).CornerRadius = UDim.new(1,0)
+local snd = Instance.new("Sound", bg); snd.SoundId = "rbxasset://sounds/action_falling_clobber.mp3"; snd.Volume = 10; snd.Pitch = 0.5; snd:Play()
 
--- Рисуем жуткую рожу программно
-local function CreatePart(sz, ps, clr)
-    local p = Instance.new("Frame", bg); p.Size = sz; p.Position = ps; p.BackgroundColor3 = clr; p.BorderSizePixel = 0; return p
-end
-
-local eyeL = CreatePart(UDim2.new(0, 80, 0, 80), UDim2.new(0.35, -40, 0.35, 0), Color3.new(1,0,0))
-local eyeR = CreatePart(UDim2.new(0, 80, 0, 80), UDim2.new(0.65, -40, 0.35, 0), Color3.new(1,0,0))
-local mouth = CreatePart(UDim2.new(0, 200, 0, 50), UDim2.new(0.5, -100, 0.7, 0), Color3.new(1,1,1))
-Instance.new("UICorner", eyeL).CornerRadius = UDim.new(1,0)
-Instance.new("UICorner", eyeR).CornerRadius = UDim.new(1,0)
-Instance.new("UICorner", mouth).CornerRadius = UDim.new(0,20)
-
--- Звук (используем стандартный из папки звуков игры)
-local sound = Instance.new("Sound", bg)
-sound.SoundId = "rbxasset://sounds/action_falling_clobber.mp3" -- Этот файл есть у ВСЕХ
-sound.Volume = 10; sound.Pitch = 0.5; sound:Play()
-
--- Эффект безумия
 task.spawn(function()
-    for i = 1, 40 do
-        bg.BackgroundColor3 = (i % 2 == 0) and Color3.new(0,0,0) or Color3.new(0.2,0,0)
-        eyeL.Size = UDim2.new(0, math.random(60,120), 0, math.random(60,120))
-        eyeR.Size = eyeL.Size
-        bg.Position = UDim2.new(0, math.random(-30,30), 0, math.random(-30,30))
-        task.wait(0.03)
-    end
+    for i = 1, 30 do bg.Position = UDim2.new(0, math.random(-25,25), 0, math.random(-25,25)); task.wait(0.04) end
     sc:Destroy()
 end)
 
--- --- ПЕРЕМЕННЫЕ ЧИТОВ ---
+-- --- НАСТРОЙКИ АИМА ---
+_G.Aimbot = false
+_G.AimbotSmooth = 0.2
+_G.FOVSize = 150
 _G.FlySpeed = 2
-_G.SpinSpeed = 100
+
+-- Круг FOV
+local FOVring = Drawing.new("Circle")
+FOVring.Visible = false; FOVring.Thickness = 1.5; FOVring.Radius = _G.FOVSize; FOVring.Color = Color3.fromRGB(255, 0, 0); FOVring.Filled = false
 
 -- --- 2. КНОПКА-ПЛЮСИК (+) ---
 local tg = Instance.new("ScreenGui", G); tg.Name = "DarkToggleGui"
@@ -52,7 +38,7 @@ local m = Instance.new("Frame", s); m.Size = UDim2.new(0, 260, 0, 420); m.Positi
 
 b.MouseButton1Click:Connect(function() m.Visible = not m.Visible; b.Text = m.Visible and "X" or "+" end)
 
-local sc_frame = Instance.new("ScrollingFrame", m); sc_frame.Size = UDim2.new(1, -10, 1, -10); sc_frame.Position = UDim2.new(0, 5, 0, 5); sc_frame.BackgroundTransparency = 1; sc_frame.CanvasSize = UDim2.new(0, 0, 0, 2400)
+local sc_frame = Instance.new("ScrollingFrame", m); sc_frame.Size = UDim2.new(1, -10, 1, -10); sc_frame.Position = UDim2.new(0, 5, 0, 5); sc_frame.BackgroundTransparency = 1; sc_frame.CanvasSize = UDim2.new(0, 0, 0, 2500)
 Instance.new("UIListLayout", sc_frame).Padding = UDim.new(0, 5)
 
 local function Add(txt, fn)
@@ -62,6 +48,33 @@ local function Add(txt, fn)
 end
 
 -- --- ФУНКЦИИ ---
+
+-- REAL AIMBOT С КРУГОМ
+Add("🎯 REAL AIMBOT: OFF", function(on, btn)
+    _G.Aimbot = on
+    FOVring.Visible = on
+    btn.Text = on and "🎯 AIMBOT: ON (LEGIT)" or "🎯 AIMBOT: OFF"
+    
+    S.RenderStepped:Connect(function()
+        if _G.Aimbot then
+            FOVring.Position = UIS:GetMouseLocation()
+            local target = nil; local dist = _G.FOVSize
+            for _, v in pairs(game.Players:GetPlayers()) do
+                if v ~= P and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    local pos, visible = workspace.CurrentCamera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
+                    if visible then
+                        local mag = (Vector2.new(pos.X, pos.Y) - UIS:GetMouseLocation()).Magnitude
+                        if mag < dist then dist = mag; target = v end
+                    end
+                end
+            end
+            if target and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then -- Захват на правую кнопку мыши
+                local cam = workspace.CurrentCamera
+                cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, target.Character.HumanoidRootPart.Position), _G.AimbotSmooth)
+            end
+        end
+    end)
+end)
 
 Add("👤 AVATAR ESP", function(on)
     _G.AvESP = on
@@ -79,28 +92,6 @@ Add("👤 AVATAR ESP", function(on)
     end)
 end)
 
-Add("🔄 SPINBOT", function(on)
-    _G.Spin = on
-    task.spawn(function()
-        while _G.Spin do
-            if P.Character and P.Character:FindFirstChild("HumanoidRootPart") then
-                P.Character.HumanoidRootPart.CFrame = P.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(_G.SpinSpeed), 0)
-            end
-            task.wait()
-        end
-    end)
-end)
-
-Add("📏 TRACERS (LINES)", function(on)
-    _G.Tracers = on
-    if on then loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Exunys-ESP/main/src/Tracer.lua"))() end
-end)
-
-Add("📍 TP TO RANDOM", function()
-    local all = game.Players:GetPlayers(); local t = all[math.random(1, #all)]
-    if t ~= P and t.Character then P.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame end
-end)
-
 Add("✈️ FLY (SMOOTH)", function(on)
     _G.Flying = on
     task.spawn(function()
@@ -112,32 +103,17 @@ Add("✈️ FLY (SMOOTH)", function(on)
     end)
 end)
 
-Add("🎯 AIMBOT (BODY)", function(on)
-    _G.Aimbot = on
+Add("🔄 SPINBOT", function(on)
+    _G.Spin = on
     task.spawn(function()
-        while _G.Aimbot do
-            local target = nil; local dist = math.huge
-            for _, v in pairs(game.Players:GetPlayers()) do
-                if v ~= P and v.Character then
-                    local d = (v.Character.HumanoidRootPart.Position - P.Character.HumanoidRootPart.Position).Magnitude
-                    if d < dist then dist = d; target = v end
-                end
+        while _G.Spin do
+            if P.Character and P.Character:FindFirstChild("HumanoidRootPart") then
+                P.Character.HumanoidRootPart.CFrame = P.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(100), 0)
             end
-            if target then workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.HumanoidRootPart.Position) end
             task.wait()
         end
     end)
 end)
 
-Add("🌈 RAINBOW SKIN", function(st)
-    _G.Rain = st
-    while _G.Rain do
-        local c = Color3.fromHSV(tick() % 5 / 5, 1, 1)
-        if P.Character then for _, v in pairs(P.Character:GetChildren()) do if v:IsA("BasePart") then v.Color = c end end end
-        task.wait(0.1)
-    end
-end)
-
-Add("🌫️ INVISIBLE", function(on) for _,v in pairs(P.Character:GetDescendants()) do if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = on and 1 or 0 end end end)
-Add("🌪️ FE FLING", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))() end)
-Add("❌ CLOSE", function() s:Destroy(); tg:Destroy() end)
+Add("📍 TP TO RANDOM", function()
+    local all
