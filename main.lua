@@ -43,4 +43,18 @@ end
 -- --- 4. ВСЕ ТВОИ ФУНКЦИИ ВМЕСТЕ ---
 
 -- Основные читы
-Add("🔥 ULTIMATE SPEED", function(st) P.Character.Humanoid.WalkSpeed = st and 120 or 16 end, Color3.fromRGB(
+Add("🔥 ULTIMATE SPEED", function(st) P.Character.Humanoid.WalkSpeed = st and 120 or 16 end, Color3.fromRGB(100, 0, 0))
+Add("👤 ESP AVATARS", function(st) _G.esp = st end) -- ESP код подхватится из твоего основного скрипта
+Add("🔍 ZOOM CLICK", function(on) _G.ZC = on; P:GetMouse().Button2Down:Connect(function() if _G.ZC then workspace.CurrentCamera.FieldOfView = 20 end end); P:GetMouse().Button2Up:Connect(function() if _G.ZC then workspace.CurrentCamera.FieldOfView = 70 end end) end)
+Add("🚀 SUPER JUMP", function(on) P.Character.Humanoid.JumpPower = on and 200 or 50; P.Character.Humanoid.UseJumpPower = true end)
+Add("📍 TP TO PLAYER", function() local all = game.Players:GetPlayers(); local r = all[math.random(1, #all)]; if r ~= P and r.Character then P.Character.HumanoidRootPart.CFrame = r.Character.HumanoidRootPart.CFrame end end)
+
+-- Вспомогательные скрипты (Loadstrings)
+Add("✈️ FLY MODE", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.lua"))() end)
+Add("🌫️ INVISIBLE FIXED", function() loadstring(game:HttpGet('https://raw.githubusercontent.com/0866/lua-scripts/master/Invisible.lua'))() end)
+Add("🌪️ FE FLING", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))() end)
+Add("🦘 INF JUMP", function(on) _G.IJ = on; game:GetService("UserInputService").JumpRequest:Connect(function() if _G.IJ then P.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end) end)
+Add("🧱 INF YIELD", function() loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() end)
+
+-- Выход
+Add("❌ CLOSE HUB", function() s:Destroy(); tg:Destroy() end, Color3.fromRGB(40,40,40))
