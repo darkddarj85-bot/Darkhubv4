@@ -1,122 +1,117 @@
-local P = game.Players.LocalPlayer
-local G = game:GetService("CoreGui")
-local TS = game:GetService("TweenService")
-local S = game:GetService("RunService")
-local UIS = game:GetService("UserInputService")
-local Mouse = P:GetMouse()
+--[[
+    † THE ULTIMATE BLOODY GOTHIC OVERHAUL †
+    BY DARK | ONLY MAIN HUB | NO OLD MENU
+]]
 
--- Очистка
-local function Clean(n) if G:FindFirstChild(n) then G[n]:Destroy() end end
-Clean("DarkElite"); Clean("DarkToggleGui"); Clean("DarkLoader")
+local notifyTitle = "OPEN SEA FOR BRAIROTS BY DARK"
 
--- --- 1. ТЯН-ЛОАДЕР (Darkness... hi-hi...) ---
-local sc = Instance.new("ScreenGui", G); sc.Name = "DarkLoader"
-local bg = Instance.new("Frame", sc); bg.Size = UDim2.new(1, 0, 1, 0); bg.BackgroundColor3 = Color3.new(0,0,0); bg.BackgroundTransparency = 1
+-- 1. ОБНОВЛЕННЫЙ ЛОАДЕР С НАДПИСЯМИ ВОКРУГ КРЕСТА
+local function SpawnGothicNotify()
+    local sg = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    local frame = Instance.new("Frame", sg)
+    frame.Size = UDim2.new(0, 300, 0, 110)
+    frame.Position = UDim2.new(1, 0, 0.7, 0) 
+    frame.BackgroundColor3 = Color3.new(0,0,0)
+    frame.BorderSizePixel = 0
+    
+    local corner = Instance.new("UICorner", frame)
+    corner.CornerRadius = UDim.new(0, 8)
+    
+    local line = Instance.new("Frame", frame)
+    line.Size = UDim2.new(1, 0, 0, 3)
+    line.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    line.BorderSizePixel = 0
 
-local txt = Instance.new("TextLabel", bg)
-txt.Size = UDim2.new(1, 0, 0, 100); txt.Position = UDim2.new(0, 0, 0.5, -50)
-txt.Text = "DARKNESS HUB"; txt.TextColor3 = Color3.fromRGB(180, 0, 255)
-txt.Font = "SpecialElite"; txt.TextSize = 1; txt.BackgroundTransparency = 1; txt.TextTransparency = 1
-Instance.new("UIStroke", txt).Color = Color3.new(1,1,1)
+    -- ГЛАВНЫЙ КРЕСТ
+    local Cross = Instance.new("TextLabel", frame)
+    Cross.Size = UDim2.new(0, 60, 0, 60)
+    Cross.Position = UDim2.new(0, 15, 0.5, -30)
+    Cross.Text = "†"
+    Cross.TextColor3 = Color3.fromRGB(255, 0, 0)
+    Cross.TextSize = 65
+    Cross.BackgroundTransparency = 1
+    Cross.Font = Enum.Font.SourceSansBold
+    Cross.Parent = frame
 
-local sound = Instance.new("Sound", bg)
-sound.SoundId = "rbxassetid://9114445511" -- Тот самый голос (Darkness + Soft laugh)
-sound.Volume = 10; sound:Play()
+    -- ДОПОЛНИТЕЛЬНЫЕ НАДПИСИ У КРЕСТА
+    local ritualText = Instance.new("TextLabel", frame)
+    ritualText.Size = UDim2.new(0, 100, 0, 20)
+    ritualText.Position = UDim2.new(0, -5, 0.7, 0)
+    ritualText.Text = "† RITUAL †"
+    ritualText.TextColor3 = Color3.fromRGB(150, 0, 0)
+    ritualText.TextSize = 12
+    ritualText.BackgroundTransparency = 1
+    ritualText.Font = Enum.Font.Antique
 
-task.spawn(function()
-    TS:Create(bg, TweenInfo.new(0.8), {BackgroundTransparency = 0.2}):Play()
-    TS:Create(txt, TweenInfo.new(1.2, Enum.EasingStyle.Back), {TextSize = 70, TextTransparency = 0}):Play()
-    task.wait(2.5)
-    TS:Create(bg, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
-    TS:Create(txt, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
-    task.wait(0.8)
-    sc:Destroy()
-end)
-
--- --- НАСТРОЙКИ ---
-_G.Aimbot = false
-_G.FlySpeed = 2
-
--- --- 2. КНОПКА-ПЛЮСИК (D) ---
-local tg = Instance.new("ScreenGui", G); tg.Name = "DarkToggleGui"
-local b = Instance.new("TextButton", tg); b.Size = UDim2.new(0, 50, 0, 50); b.Position = UDim2.new(0, 20, 0.5, -25); b.Text = "D"; b.BackgroundColor3 = Color3.fromRGB(20, 0, 40); b.TextColor3 = Color3.new(1,1,1); b.Font = "SourceSansBold"; b.TextSize = 25; b.Draggable = true; b.Active = true
-Instance.new("UIStroke", b).Color = Color3.fromRGB(150, 0, 255); Instance.new("UICorner", b).CornerRadius = UDim.new(1,0)
-
--- --- 3. ГЛАВНОЕ МЕНЮ (V14) ---
-local s = Instance.new("ScreenGui", G); s.Name = "DarkElite"
-local m = Instance.new("Frame", s); m.Size = UDim2.new(0, 250, 0, 420); m.Position = UDim2.new(0.5, -125, 0.5, -210); m.BackgroundColor3 = Color3.fromRGB(10, 0, 15); m.Visible = true; m.Active = true; m.Draggable = true
-Instance.new("UIStroke", m).Color = Color3.fromRGB(130, 0, 255); Instance.new("UICorner", m)
-
-b.MouseButton1Click:Connect(function() m.Visible = not m.Visible; b.Text = m.Visible and "D" or "+" end)
-
-local sc_frame = Instance.new("ScrollingFrame", m); sc_frame.Size = UDim2.new(1, -10, 1, -10); sc_frame.Position = UDim2.new(0, 5, 0, 5); sc_frame.BackgroundTransparency = 1; sc_frame.CanvasSize = UDim2.new(0, 0, 0, 2200); sc_frame.ScrollBarThickness = 0
-Instance.new("UIListLayout", sc_frame).Padding = UDim.new(0, 8)
-
-local function Add(txt, fn)
-    local btn = Instance.new("TextButton", sc_frame); btn.Size = UDim2.new(1, -5, 0, 38); btn.Text = txt; btn.BackgroundColor3 = Color3.fromRGB(25, 0, 35); btn.TextColor3 = Color3.new(1,1,1); btn.Font = "GothamBold"; btn.TextSize = 10; Instance.new("UICorner", btn)
-    local on = false
-    btn.MouseButton1Click:Connect(function() 
-        on = not on
-        btn.BackgroundColor3 = on and Color3.fromRGB(120, 0, 220) or Color3.fromRGB(25, 0, 35)
-        pcall(function() fn(on, btn) end)
+    -- АНИМАЦИЯ
+    task.spawn(function()
+        while frame.Parent do
+            local t = tick()
+            local p = (math.sin(t * 6) * 0.5) + 0.5
+            Cross.TextTransparency = 0.3 * p
+            ritualText.TextTransparency = p
+            line.BackgroundColor3 = Color3.fromRGB(150 + (p * 105), 0, 0)
+            task.wait(0.05)
+        end
     end)
+    
+    local t = Instance.new("TextLabel", frame)
+    t.Size = UDim2.new(1, -90, 0, 30)
+    t.Position = UDim2.new(0, 90, 0, 20)
+    t.Text = "† DARK SOULS †"
+    t.TextColor3 = Color3.fromRGB(255, 0, 0)
+    t.Font = Enum.Font.Antique
+    t.TextSize = 20
+    t.TextXAlignment = Enum.TextXAlignment.Left
+    t.BackgroundTransparency = 1
+    
+    local desc = Instance.new("TextLabel", frame)
+    desc.Size = UDim2.new(1, -90, 0, 40)
+    desc.Position = UDim2.new(0, 90, 0, 50)
+    desc.Text = "ABSORBING BRAIROTS..."
+    desc.TextColor3 = Color3.fromRGB(100, 100, 100)
+    desc.Font = Enum.Font.SourceSansItalic
+    desc.TextSize = 14
+    desc.TextXAlignment = Enum.TextXAlignment.Left
+    desc.BackgroundTransparency = 1
+    desc.Parent = frame
+
+    frame:TweenPosition(UDim2.new(1, -320, 0.7, 0), "Out", "Back", 0.6)
+    task.delay(5, function() if sg then sg:Destroy() end end)
 end
 
--- --- ФУНКЦИИ ---
+SpawnGothicNotify()
 
--- СУПЕР АИМБОТ
-Add("🎯 SILENT LOCK (HOLD RMB)", function(on)
-    _G.Aimbot = on
-    task.spawn(function()
-        while _G.Aimbot do
-            local target = nil; local dist = 600
-            for _, v in pairs(game.Players:GetPlayers()) do
-                if v ~= P and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    local screenPos, visible = workspace.CurrentCamera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
-                    if visible then
-                        local mag = (Vector2.new(screenPos.X, screenPos.Y) - UIS:GetMouseLocation()).Magnitude
-                        if mag < dist then dist = mag; target = v end
-                    end
-                end
-            end
-            if target and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-                workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame:Lerp(CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.HumanoidRootPart.Position), 0.2)
-            end
-            task.wait()
-        end
-    end)
+-- 2. ИНЪЕКЦИЯ КРОВИ (ТОЛЬКО В ОСНОВНОЙ ХАБ)
+local function BloodInfection(obj)
+    if obj:IsA("Frame") or obj:IsA("ScrollingFrame") or obj:IsA("TextButton") then
+        obj.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
+        if obj:IsA("TextButton") then obj.TextColor3 = Color3.fromRGB(255, 0, 0) end
+    elseif obj:IsA("TextLabel") then
+        obj.TextColor3 = Color3.fromRGB(255, 0, 0)
+        if not obj.Text:find("†") then obj.Text = "† " .. obj.Text .. " †" end
+    elseif obj:IsA("UIStroke") then
+        obj.Color = Color3.fromRGB(180, 0, 0)
+    end
+end
+
+game:GetService("CoreGui").DescendantAdded:Connect(function(d)
+    task.wait(0.1)
+    BloodInfection(d)
 end)
 
--- ПЛАВНЫЙ ФЛАЙ
-Add("✈️ INFINITE FLY", function(on)
-    _G.Flying = on
-    task.spawn(function()
-        while _G.Flying do
-            local move = P.Character.Humanoid.MoveDirection
-            if move.Magnitude > 0 then P.Character.HumanoidRootPart.CFrame += (move * _G.FlySpeed) end
-            P.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0); task.wait()
-        end
-    end)
+-- 3. ЗАПУСК ГЛАВНОГО СКРИПТА (БЕЗ ЛИШНИХ МЕНЮ)
+pcall(function()
+    local raw = game:HttpGet("https://raw.githubusercontent.com/mglalma019-design/Open-sea/refs/heads/main/Brainrot")
+    local mod = raw
+        :gsub("Botak Hub", "† "..notifyTitle.." †")
+        :gsub("Open Sea", "† DARK SEA †")
+        :gsub("Botak", "Dark")
+        :gsub("botak", "dark")
+        :gsub("Color3.fromRGB%(%d+,%s*%d+,%s*%d+%)", "Color3.fromRGB(15, 0, 0)")
+    
+    loadstring(mod)()
 end)
 
--- АВАТАР ВХ
-Add("👤 AVATAR ESP", function(on)
-    _G.AvESP = on
-    task.spawn(function()
-        while _G.AvESP do
-            for _, p in pairs(game.Players:GetPlayers()) do
-                if p ~= P and p.Character and p.Character:FindFirstChild("Head") and not p.Character.Head:FindFirstChild("AvX") then
-                    local g = Instance.new("BillboardGui", p.Character.Head); g.Name = "AvX"; g.AlwaysOnTop = true; g.Size = UDim2.new(0, 45, 0, 45); g.ExtentsOffset = Vector3.new(0, 3, 0)
-                    local i = Instance.new("ImageLabel", g); i.Size = UDim2.new(1, 0, 1, 0); i.Image = "rbxthumb://type=AvatarHeadShot&id="..p.UserId.."&w=150&h=150"; i.BackgroundTransparency = 1; Instance.new("UICorner", i).CornerRadius = UDim.new(1, 0)
-                end
-            end
-            task.wait(1.5)
-            if not _G.AvESP then for _, p in pairs(game.Players:GetPlayers()) do if p.Character and p.Character.Head:FindFirstChild("AvX") then p.Character.Head.AvX:Destroy() end end end
-        end
-    end)
-end)
-
-Add("🔄 SPINBOT", function(on) _G.Spin = on while _G.Spin do if P.Character then P.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(50), 0) end task.wait() end end)
-Add("🌈 RAINBOW SKIN", function(on) _G.R = on while _G.R do for _,v in pairs(P.Character:GetChildren()) do if v:IsA("BasePart") then v.Color = Color3.fromHSV(tick()%5/5,1,1) end end task.wait(0.1) end end)
-Add("🌪️ FE FLING", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/DigitalityScripts/Digitality/main/Fling%20GUI"))() end)
-Add("❌ CLOSE", function() s:Destroy(); tg:Destroy() end)
+-- Чистим всё, что уже успело вылезти
+for _, v in pairs(game:GetService("CoreGui"):GetDescendants()) do BloodInfection(v) end
